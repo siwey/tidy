@@ -22,7 +22,6 @@ Im Durchschnitt verlassen die Erwerbspersonen den Arbeitsmarkt mit 65,2 Jahren, 
 
 ```{r plot0, echo=FALSE,  include=FALSE, message=FALSE,warning=FALSE}
 
-
 library(OECD)
 library(tidyverse)
 library(ggplot2)
@@ -99,7 +98,7 @@ library(ggplot2)
 
 
 df <- get_dataset("LFS_SEXAGE_I_R",
-                  filter = list(c("CHE","DEU","FRA","AUT","ITA"),"MW",c("1524"),"EPR"))
+                  filter = list(c("CHE","DEU","FRA","AUT","ITA"),"MW",c("1564"),"EPR"))
 
 sel <- df %>%
   filter(FREQ == "A",
@@ -130,16 +129,14 @@ p <- ggplot(data=sel, aes(x = as.Date(obsTime,"%Y"), y = obsValue, color = COUNT
   #scale_x_continuous(name="Speed of cars", limits=c(2010, 2020)) +
   theme(legend.position="top") + coord_fixed(ratio=100)+  theme(text = element_text(size = 15))+scale_y_continuous(labels = function(x) paste0(x*1, "%"))
 
-png('/Users/simonwey/Repos/Report_Unemploy/Graphics/ETQ_1524.png')
+png('/Users/simonwey/Repos/Report_Unemploy/Graphics/ETQ_1564.png')
 print(p)
 dev.off()
 
-
-  
 ```
 \begin{figure} \centering
-\includegraphics[trim={0 4cm 0 3.5cm },clip]{/Users/simonwey/Repos/Report_Unemploy/Graphics/ETQ_1524.png}
-\caption{Erwerbstätigenquoten von Personen im Alter zwischen 55 und 64 Jahren}
+\includegraphics[trim={0 5cm 0 3.5cm },clip]{/Users/simonwey/Repos/Report_Unemploy/Graphics/ETQ_1564.png}
+\caption{Erwerbstätigenquoten von Personen im Alter zwischen 15 und 64 Jahren}
 \label{ET_1524+}
 \end{figure}
 
@@ -192,7 +189,7 @@ dev.off()
 ```
 \begin{figure} \centering
 \includegraphics[trim={0 4cm 0 3.5cm },clip]{/Users/simonwey/Repos/Report_Unemploy/Graphics/ETQ_1524.pdf}
-\caption{Erwerbstätigenquoten von Personen im Alter zwischen 65 und 69 Jahren}
+\caption{Erwerbstätigenquoten von Personen im Alter zwischen 15 und 24 Jahren}
 \label{ET_1524}
 \end{figure}
 
@@ -337,7 +334,7 @@ p <- ggplot(data=sel, aes(x = as.Date(obsTime,"%Y"), y = obsValue, color = COUNT
   theme_minimal()+
  # scale_y_continuous(breaks = seq(0, 2020, 15), minor_breaks = seq(0, 2020, 5)) +
   #scale_x_continuous(name="Speed of cars", limits=c(2010, 2020)) +
-  theme(legend.position="top") + coord_fixed(ratio=250)+  theme(text = element_text(size = 15))+scale_y_continuous(labels = function(x) paste0(x*1, "%"))
+  theme(legend.position="top") + coord_fixed(ratio=100)+  theme(text = element_text(size = 15))+scale_y_continuous(labels = function(x) paste0(x*1, "%"))
 
 pdf('/Users/simonwey/Repos/Report_Unemploy/Graphics/ELQ_1524.pdf')
 print(p)
