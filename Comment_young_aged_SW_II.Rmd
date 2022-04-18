@@ -1,0 +1,406 @@
+---
+title: "Jung und unerfahren!"
+author: "Simon Wey"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: null
+  html_document:
+    df_print: paged
+lang: de
+classoption: twocolumn
+---
+
+Nur wenige Themen sind politisch so aufgeladen wie Fragestellungen zur Generation Silber. Dazu dürfte wesentlich beitragen, dass sich Personen dieser Altersgruppe zur Profilierung sehr gut eignen, insbesondere auch weil ihr Stellenwert schon hoch ist und er zukünftig weiter stark zunehmen wird. Doch wie ist die Situation von Personen ab 50 Jahren wirklich, was zeigt eine nüchterne Analyse? Ordnen wir das Thema basierend auf Zahlenmaterial ein und werfen einen Blick auf die Herausforderungen zur besseren Erschliessung des Potenzials dieser Altersgruppe. 
+
+Im Herbst 2021 hat das Bundesamt für Statistik eine fundierte Analyse^[[www.bfs.admin.ch/asset/de/2150-2000](https://www.bfs.admin.ch/asset/de/2150-2000)]  zu Personen ab 50 Jahren im Schweizer Arbeitsmarkt veröffentlicht. Die Erkenntnisse daraus zeigen, wie vorteilhaft die Situation dieser Personen insgesamt bereits ist und vor allem auch, welches Potenzial noch besteht. 
+So betrug der Anteil an Erwerbstätigen im Alter ab 55 Jahren 2020 knapp 23 Prozent, 10 Jahre zuvor lag er noch bei 19 Prozent. Etwa 2050 wird dieser Anteil einen Höchststand erreichen. Auch laufen Personen im Alter zwischen 55 und 64 Jahren eine tiefere Gefahr erwerbslos zu werden als die gesamte Erwerbsbevölkerung. Und dies war auch bereits in Vergangenheit so: So lag deren Erwerbslosenquote in den letzten Jahren durchschnittlich einen Prozentpunkt tiefer als diejenige der gesamten Erwerbsbevölkerung (vgl. Abbildung \ref{ELQ_Age_classes}). 
+
+Noch ist die Erwerbstätigenquote dieser Altersklasse im Vergleich zur gesamten Erwerbsbevölkerung tiefer, jedoch nahm sie in den letzten 15 Jahren um mehr als acht Prozentpunkte überdurchschnittlich stark zu. Beachtlich ist auch, dass 2020 noch fast jede vierte Person im Alter zwischen 65 und 69 Jahren und immerhin noch fast jede achte Person der 70- bis 74-Jährigen erwerbstätig war. Auch nahm der Anteil an Erwerbstätigen bei beiden Altersklassen in den letzten 15 Jahren um mehr als sieben respektive um mehr als vier Prozentpunkte zu.
+
+Auffällig ist, dass 2020 von den erwerbstätigen Personen ab 65 Jahren mehr als jede zweite selbstständigerwerbend oder in einem Familienunternehmen aktiv war. Zudem sind acht von zehn Teilzeit beschäftigt, sechs davon in einem Pensum unter 50 Prozent. 19 Prozent der Personen im Alter zwischen 50 und 64 Jahren gehörten 2020 nicht zur Erwerbsbevölkerung. Jede Fünfte von ihnen wäre jedoch bereit, innerhalb von kurzer Zeit wieder ins Erwerbsleben einzusteigen.
+Im Durchschnitt verlassen die Erwerbspersonen den Arbeitsmarkt mit 65,2 Jahren, wobei sich das Alter nicht nur bezüglich Erwerbsstatus, sondern auch mit Blick auf den Wirtschaftszweig stark unterscheidet. Interessant ist der Blick auf Personen, die den Arbeitsmarkt vor dem Erreichen des Pensionsalters frühzeitig verlassen. Diese sogenannte Frühpensionierungsquote betrug 2020 bei Personen, die sechs Jahre vor ihrer ordentlichen Pensionierung standen, 4,8 Prozent bei Männern und 4,2 Prozent bei Frauen. Sie steigt mit sich dem Pensionsalter annähernden Alter stark an und lag ein Jahr vor dem ordentlichen Pensionierungsalter bei Männern bereits bei 39 Prozent und bei Frauen bei 30 Prozent. 
+
+```{r plot0, echo=FALSE,  include=FALSE, message=FALSE,warning=FALSE}
+
+
+library(OECD)
+library(tidyverse)
+library(ggplot2)
+
+#df <- get_dataset("LFS_SEXAGE_I_R",
+#                  filter = list(c("CHE","DEU"),"MW",c(""),"UR"))
+
+
+df <- get_dataset("LFS_SEXAGE_I_R",
+                  filter = list(c("CHE"),"MW",c("1524","2534","3544","4554","5564","1564"),"UR"))
+
+sel <- df %>%
+  filter(FREQ == "A",
+         obsTime >= 2000 
+         #        MEASURE == "STE"
+  ) %>%
+  # let's focus on cols location, time value, because none
+  # of the other cols contain information, i.e., all their values
+  # are the same
+  select(obsTime, AGE, obsValue)
+
+sel$AGE[sel$AGE=="1524"] <- "15 - 24 J."
+sel$AGE[sel$AGE=="2534"] <- "25 - 34 J."
+sel$AGE[sel$AGE=="3544"] <- "35 - 44 J."
+sel$AGE[sel$AGE=="4554"] <- "45 - 54 J."
+sel$AGE[sel$AGE=="5564"] <- "55 - 64 J."
+sel$AGE[sel$AGE=="1564"] <- "15 - 64 J."
+
+p <- ggplot(sel, aes(x = obsTime, y = obsValue)) + 
+  geom_col(data=subset(sel, AGE == "15 - 64 J."),aes(x = as.Date(obsTime[AGE=="15 - 64 J."],"%Y"), y=obsValue[AGE=="15 - 64 J."], fill="15 - 64 J.")) +
+  geom_line(data=subset(sel, AGE == "15 - 24 J."),aes(x = as.Date(obsTime[AGE=="15 - 24 J."],"%Y"), y=obsValue[AGE=="15 - 24 J."],color="15 - 24 J."),size=.9, group=1) +  
+  geom_line(data=subset(sel, AGE == "25 - 34 J."),aes(x = as.Date(obsTime[AGE=="25 - 34 J."],"%Y"), y=obsValue[AGE=="25 - 34 J."]),colour="#F8C471",size=.9)+   
+  geom_line(data=subset(sel, AGE == "35 - 44 J."),aes(x = as.Date(obsTime[AGE=="35 - 44 J."],"%Y"), y=obsValue[AGE=="35 - 44 J."]),colour="#34495E",size=.9)+   
+  geom_line(data=subset(sel, AGE == "45 - 54 J."),aes(x = as.Date(obsTime[AGE=="45 - 54 J."],"%Y"), y=obsValue[AGE=="45 - 54 J."]),colour="#138D75",size=.9)+   
+  geom_line(data=subset(sel, AGE == "55 - 64 J."),aes(x = as.Date(obsTime[AGE=="55 - 64 J."],"%Y"), y=obsValue[AGE=="55 - 64 J."]),colour="#E74C3C",size=.9)   +
+  #geom_line(size=.9) +
+  scale_fill_manual(name = NULL, values = c("15 - 64 J." = "#D6EAF8")) +
+  scale_color_manual(name = NULL, values = c("15 - 24 J." = "#8E44AD", "25 -34 J."="#F8C471","35 - 44 J."="#34495E","45 - 54 J."="#138D75","55 - 64 J."="#E74C3C"))+
+  labs(#title = "Erwerbslosenrate",
+    #subtitle = "Verkaufte Weihnachtsbäume in USA | Quelle: Statista",
+    y = "",
+    x = "",
+    color = "") +
+  theme_minimal()+
+  theme(legend.position="top",legend.box="horizontal",legend.title=element_blank()) + 
+  coord_fixed(ratio=400) +  
+  theme(legend.text=element_text(size=15))+
+  theme(text = element_text(size = 15))+
+  scale_y_continuous(labels = function(x) paste0(x*1, "%"))+
+  theme(legend.position = "top") +
+  guides(color = guide_legend(nrow = 2, byrow = TRUE))
+pdf('/Users/simonwey/Repos/Report_Unemploy/Graphics/ELQ.pdf')
+print(p)
+dev.off()
+
+```
+
+\begin{figure} \centering
+\includegraphics[trim={0 4cm 0 3.5cm },clip]{/Users/simonwey/Repos/Report_Unemploy/Graphics/ELQ.pdf}
+\caption{Erwerbslosenquoten von Personen unterschiedlichen Alters in der Schweiz}
+\label{ELQ_Age_classes}
+\end{figure}
+
+
+Getrübt wird dieses erfreuliche Bild durch die Tatsache, dass erwerbslose ältere im Vergleich zu jüngeren Personen grössere Schwierigkeiten bekunden eine neue Stelle zu finden. Sie sind öfter langzeiterwerbslos, wobei von den erwerbslosen Personen im Alter zwischen 50 und 64 Jahren über die Hälfte länger als ein Jahr eine neue Stelle sucht. Auch zeigt die Statistik, dass ältere Personen seltener als jüngere ihre Stelle wechseln und sie weniger flexibel -- insbesondere mit Blick auf die räumliche Mobilität und den Beschäftigungsgrad -- sind. 
+
+```{r ,plot1,echo=FALSE, include=FALSE, message=FALSE,warning=FALSE}
+
+library(OECD)
+library(tidyverse)
+library(echarts4r)
+library(ggplot2)
+
+
+
+df <- get_dataset("LFS_SEXAGE_I_R",
+                  filter = list(c("CHE","DEU","FRA","AUT","ITA"),"MW",c("1524"),"EPR"))
+
+sel <- df %>%
+  filter(FREQ == "A",
+         obsTime >= 2000 
+         #        MEASURE == "STE"
+  ) %>%
+  # let's focus on cols location, time value, because none
+  # of the other cols contain information, i.e., all their values
+  # are the same
+  select(obsTime, COUNTRY, obsValue)
+
+sel$COUNTRY[sel$COUNTRY=="AUT"] <- "Österreich"
+sel$COUNTRY[sel$COUNTRY=="CHE"] <- "Schweiz"
+sel$COUNTRY[sel$COUNTRY=="FRA"] <- "Frankreich"
+sel$COUNTRY[sel$COUNTRY=="ITA"] <- "Italien"
+sel$COUNTRY[sel$COUNTRY=="DEU"] <- "Deutschland"
+
+p <- ggplot(data=sel, aes(x = as.Date(obsTime,"%Y"), y = obsValue, color = COUNTRY)) + 
+  geom_line(size=.9)+
+  scale_color_manual(values = c("red", "green4","blue","black","orange","grey")) +
+  labs(#title = "Erwerbstätigenrate",
+       #subtitle = "Verkaufte Weihnachtsbäume in USA | Quelle: Statista",
+       y = "",
+       x = "",
+       color = "") +
+  theme_minimal()+
+ # scale_y_continuous(breaks = seq(0, 2020, 15), minor_breaks = seq(0, 2020, 5)) +
+  #scale_x_continuous(name="Speed of cars", limits=c(2010, 2020)) +
+  theme(legend.position="top") + coord_fixed(ratio=100)+  theme(text = element_text(size = 15))+scale_y_continuous(labels = function(x) paste0(x*1, "%"))
+
+png('/Users/simonwey/Repos/Report_Unemploy/Graphics/ETQ_1524.png')
+print(p)
+dev.off()
+
+
+  
+```
+\begin{figure} \centering
+\includegraphics[trim={0 4cm 0 3.5cm },clip]{/Users/simonwey/Repos/Report_Unemploy/Graphics/ETQ_1524.png}
+\caption{Erwerbstätigenquoten von Personen im Alter zwischen 55 und 64 Jahren}
+\label{ET_1524+}
+\end{figure}
+
+Wirft man zum Vergleich noch einen Blick auf die Situation in unseren Nachbarländern, so zeigt sich, dass ältere Arbeitnehmende hierzulande die höchste Erwerbstätigenquote und die zweittiefste Erwerbslosenquote hinter Deutschland haben. Während in Deutschland bei den 65- bis 69-Jährigen 2020 nur noch knapp 17, in Italien 13 und in Österreich und Frankreich acht Prozent einer geregelten Arbeit nachgingen, waren es in der Schweiz wie bereits erwähnt knapp 23 Prozent.
+Der Blick auf die Zahlen zeichnet somit ein anderes Bild, als medial oft vermittelt wird. Daraus jedoch zu schliessen, es gebe keinen Handlungsbedarf, wäre verfehlt. Im Gegenteil, vor dem Hintergrund des sich akzentuierenden Fachkräftemangels sind Wirtschaft und Politik in der Verantwortung, das Potenzial bei älteren Arbeitnehmenden besser und rascher zu erschliessen. 
+
+```{r ,plot_11,echo=FALSE, include=FALSE, message=FALSE,warning=FALSE}
+
+library(OECD)
+library(tidyverse)
+library(echarts4r)
+library(ggplot2)
+
+df <- get_dataset("LFS_SEXAGE_I_R",
+                  filter = list(c("CHE","DEU","FRA","AUT","ITA"),"MW",c("1524"),"EPR"))
+
+sel <- df %>%
+  filter(FREQ == "A",
+         obsTime >= 2000 
+         #        MEASURE == "STE"
+  ) %>%
+  # let's focus on cols location, time value, because none
+  # of the other cols contain information, i.e., all their values
+  # are the same
+  select(obsTime, COUNTRY, obsValue)
+
+sel$COUNTRY[sel$COUNTRY=="AUT"] <- "Österreich"
+sel$COUNTRY[sel$COUNTRY=="CHE"] <- "Schweiz"
+sel$COUNTRY[sel$COUNTRY=="FRA"] <- "Frankreich"
+sel$COUNTRY[sel$COUNTRY=="ITA"] <- "Italien"
+sel$COUNTRY[sel$COUNTRY=="DEU"] <- "Deutschland"
+p <- ggplot(data=sel, aes(x = as.Date(obsTime,"%Y"), y = obsValue, color = COUNTRY)) + 
+  geom_line(size=.9)+
+  scale_color_manual(values = c("red", "green4","blue","black","orange","grey")) +
+  labs(#title = "Erwerbslosenrate",
+       #subtitle = "Verkaufte Weihnachtsbäume in USA | Quelle: Statista",
+       y = "",
+       x = "",
+       color = "") +
+  theme_minimal()+
+ # scale_y_continuous(breaks = seq(0, 2020, 15), minor_breaks = seq(0, 2020, 5)) +
+  #scale_x_continuous(name="Speed of cars", limits=c(2010, 2020)) +
+  theme(legend.position="top") + coord_fixed(ratio=75)+  theme(text = element_text(size = 15))+scale_y_continuous(labels = function(x) paste0(x*1, "%"))
+
+pdf('/Users/simonwey/Repos/Report_Unemploy/Graphics/ETQ_1524.pdf')
+print(p)
+dev.off()
+ 
+  
+```
+\begin{figure} \centering
+\includegraphics[trim={0 4cm 0 3.5cm },clip]{/Users/simonwey/Repos/Report_Unemploy/Graphics/ETQ_1524.pdf}
+\caption{Erwerbstätigenquoten von Personen im Alter zwischen 65 und 69 Jahren}
+\label{ET_1524}
+\end{figure}
+
+## Handlungsbedarf bei staatlichen und betrieblichen Rahmenbedingungen 
+Noch halten staatliche und betriebliche Rahmenbedingungen zu oft ältere Personen von einer stärkeren Teilnahme im Arbeitsmarkt ab. So trägt etwa das starre und vergleichsweise tiefe Pensionsalter stark dazu bei, dass Anreize von Arbeitgebenden und Arbeitnehmenden wegen der absehbar kurzen Verbleibdauer der Arbeitskräfte im Arbeitsmarkt mit steigendem Alter zurück gehen. Damit bleiben Weiterbildungsaktivitäten und somit Massnahmen zur Verbesserung der Arbeitsmarktfähigkeit von älteren Mitarbeitenden öfter aus und deren Wiedereingliederung in den Arbeitsmarkt wird erschwert. Für die Arbeitgebenden wird es unattraktiv bei Mitarbeitenden in Weiterbildungen respektive in die Vermittlung von firmenspezifischem Wissen zu investieren, da der zeitliche Verbleib dieser Arbeitskräfte wegen der bevorstehenden Pension nur noch sehr beschränkt ist. Letzteres gilt auch bei älteren Personen, die gerne in den Arbeitsmarkt wiedereinsteigen würden. Gleichzeitig sinkt auch bei Arbeitnehmenden der Anreiz auf Weiterbildungen und bei Stellensuchenden auf Umschulungen und aufwändige Einarbeitung zur Besetzung einer potenziellen Stelle. 
+Auch halten die staatlichen Rahmenbedingungen potenzielle Arbeitskräfte von einer Weiterarbeit über das Pensionsalter hinaus entweder ganz ab oder die finanziellen Anreize sind so, dass sie sich nur in tiefen Arbeitspensen einbringen. Nicht weiter überraschend engagieren sich deshalb viele der Erwerbstätigen über 65 Jahre nur in tiefen Teilzeitpensen. Auch viele Betriebe stehen in der Verantwortung, wenn sie Anstellungsverhältnisse vertraglich mit dem Erreichen des Pensionsalters automatisch beenden. Nicht weiter überraschend sind es deshalb hauptsächlich Selbstständigerwerbende und Arbeitnehmende in Familienbetrieben die bisher über das Pensionsalter hinaus erwerbstätig bleiben. Auch verlässt jeder Vierte den Arbeitsmarkt zwei Jahre und mehr als jeder Dritte ein Jahr vor dem ordentlichen Pensionsalter. Es stellt sich bei diesen Zahlen zwangsläufig die Frage, ob die Anreize für einen Verbleib der gut qualifizierten Arbeitskräfte bis mindestens zum ordentlichen Pensionsalter richtig gesetzt sind.  
+
+## Die Arbeitgeber lancieren focus50plus 
+
+Mit der Ende Januar gegründeten Organisation [focus50plus](www.focus50plus.ch) wird der Schweizerische Arbeitgeberverband die Themenfelder zu älteren Arbeitnehmenden verstärkt und im Austausch mit Wirtschaft, Wissenschaft und Politik bearbeiten. Wie die Erfahrung zeigt, brauchen ältere Personen nach einem Stellenverlust länger als jüngere für den Wiedereinstieg in den Arbeitsmarkt. Deshalb soll prioritär die Arbeitsmarktfähigkeit von bestehenden Mitarbeitern gefördert werden. Damit können die Arbeitsverhältnisse nachhaltig stabilisiert und die Mitarbeitenden resistenter gegen einen Stellenverlust gemacht werden. Zudem will focus50plus die Generationenzusammenarbeit stärken, die Weiterarbeit über das Pensionsalter hinaus attraktiver gestalten und die Wiedereingliederung von älteren Arbeitnehmenden forcieren. Dabei ist völlig klar, dass eine Weiterarbeit stark von der jeweiligen Tätigkeit abhängt. Heute wird jedoch zu oft verdienten, gesunden und zur Weiterarbeit motivierten Mitarbeitenden ein Ausscheiden aus dem Arbeitsmarkt von den Unternehmen nahegelegt. Ebenfalls soll das frühzeitige Ausscheiden aus dem Arbeitsmarkt unattraktiver und die Weiterarbeit nach der Pensionierung gefördert werden. Dazu sollen wo notwendig die staatlichen und betrieblichen Rahmenbedingungen angepasst werden. 
+
+```{r plot3, include=FALSE}
+
+
+library(echarts4r)
+library(viridisLite)
+library(jsonlite)
+library(tidyverse)
+library(readxl)
+library(webshot2)
+webshot::install_phantomjs()
+
+xlsx_exa <- read_excel("ALQ_Kt.xlsx",sheet=1)#,range ="" "d19:d44")
+xlsx_exa <- xlsx_exa[4:29,c(1,3)]
+
+stat <- read_excel("Kantons_Abk.xlsx",range ="a2:b27",col_names=FALSE)
+stat$...1[4]="Basel-Landschaft"
+stat$...1[16]="St. Gallen"
+#xlsx_exa <- read_excel("https://www.bfs.admin.ch/bfsstatic/dam/assets/18784196/master",range = "A3:EI11")
+
+
+names(xlsx_exa)[1] <- c("Cantons")
+
+d <- data.frame(
+  name=xlsx_exa$Cantons,
+  values=xlsx_exa$...3
+)
+#d$values <- paste(d$values, "%", sep="")
+
+d$name[25] <- "Genève"
+d$name[10] <- "Fribourg"
+d$name[24] <- "Neuchâtel"
+d$name[22] <- "Vaud"
+d$name[23] <- "Valais"
+d$name[21] <- "Ticino"
+
+
+d$name[]
+
+json_ch <- jsonlite::read_json(
+  "georef-switzerland-kanton.geojson"
+)
+
+d$values <- round(as.numeric(d$values), 3)
+
+
+a = min(d$values)
+b=max(d$values)
+
+myplot <- d |>
+  e_charts(name) |>
+  e_map_register("CH", json_ch) |>
+  e_map(serie=values, map="CH") |>
+  e_text_style(fontSize=30) |>
+  #e_visual_map(values,
+  #             inRange = list(color = viridis(3))) |>
+  e_visual_map(values, 
+               show=TRUE, 
+               type="piecewise",
+               splitList = list(
+                 list(min = 4.1,max=5.0, label="4-5 %"),
+                 list(min = 3.1,max=4.0,label="3-4 %"),
+                 list(min = 2.1, max = 3.0,label="2-3 %"),
+                 list(min = 1.0, max = 2.0,label="1-2 %")
+               ),
+               top = "10%",left = "0%") |>#,min=a,max=b) |>
+  e_tooltip(
+    trigger = "item"#,
+    #formatter = e_tooltip_choro_formatter("percent")
+  ) |>
+  e_theme("london")
+
+htmlwidgets::saveWidget(widget = myplot, file ="/Users/simonwey/Repos/Report_Unemploy/Graphics/ca_gauge.html")
+
+webshot('/Users/simonwey/Repos/Report_Unemploy/Graphics/ca_gauge.html', file = '/Users/simonwey/Repos/Report_Unemploy/Graphics/myplot3.png')
+
+```
+
+\begin{figure}[h]
+  \centering
+    \includegraphics[trim={0 4cm 3.5cm 0},clip]{/Users/simonwey/Repos/Report_Unemploy/Graphics/myplot3.png}
+    \caption{Ausprägung der Schwierigkeiten bei der Suche nach Hochschulabgängern als Arbeitnehmende. }
+\end{figure}
+
+focus50plus will Arbeitgebende wie auch deren Mitarbeitende für gute und nachhaltige Lösungen sensibilisieren und diese möglichst breit skalieren. Voraussetzung dabei ist jedoch auch, dass sich sowohl Arbeitgebende als auch Arbeitnehmende von alten Denkmustern lösen und innovativen Lösungen Raum bieten. So sind heute unkonventionelle Karriereverläufe von älteren Arbeitnehmenden eher die Ausnahme, obwohl sie oft im gegenseitigen Interesse von Arbeitgebenden und Arbeitnehmenden wären. Beispielsweise kann es sinnvoll sein, das Arbeitspensum zu reduzieren, weniger Verantwortung zu tragen, dafür aber bis über das ordentliche Pensionsalter hinaus weiterzuarbeiten und sich so schrittweise aus dem Arbeitsleben zurückzuziehen. Heute ist es oft so, dass Arbeitnehmende auf Teufel komm raus Vollzeit bis zur Pension arbeiten um dann die die Erwerbsarbeit von heute auf morgen auf null herunterzufahren. 
+```{r ,plot4,echo=FALSE, include=FALSE, message=FALSE,warning=FALSE}
+
+library(OECD)
+library(tidyverse)
+library(ggplot2)
+
+
+# labor market example for Switzerland
+dataset <- "STLABOUR"
+
+#dstruc <- get_data_structure(dataset)
+#df <- data.frame(dstruc$SUBJECT$id,dstruc$SUBJECT$label)
+#t <- head(dstruc)
+#dstruc$MEASURE LREMTT
+
+#Erwerbslosenquote
+de <- get_dataset("LFS_SEXAGE_I_R",
+                  filter = list(c("CHE","DEU","FRA","AUT","ITA"),"MW",c("1524"),"UR"))
+
+sel <- de %>%
+  filter(FREQ == "A",
+         obsTime >= 2000
+  ) |>
+  # let's focus on cols location, time value, because none
+  # of the other cols contain information, i.e., all their values
+  # are the same
+  
+  select(obsTime, COUNTRY, obsValue)
+sel$COUNTRY[sel$COUNTRY=="AUT"] <- "Österreich"
+sel$COUNTRY[sel$COUNTRY=="CHE"] <- "Schweiz"
+sel$COUNTRY[sel$COUNTRY=="FRA"] <- "Frankreich"
+sel$COUNTRY[sel$COUNTRY=="ITA"] <- "Italien"
+sel$COUNTRY[sel$COUNTRY=="DEU"] <- "Deutschland"
+
+wide_out <- sel %>%
+  pivot_wider(names_from = COUNTRY,
+              values_from = obsValue)
+
+p <- ggplot(data=sel, aes(x = as.Date(obsTime,"%Y"), y = obsValue, color = COUNTRY)) + 
+  geom_line(size=.9)+
+  scale_color_manual(values = c("red", "green4","blue","black","orange","grey")) +
+  labs(#title = "Erwerbslosenrate",
+       #subtitle = "Verkaufte Weihnachtsbäume in USA | Quelle: Statista",
+       y = "",
+       x = "",
+       color = "") +
+  theme_minimal()+
+ # scale_y_continuous(breaks = seq(0, 2020, 15), minor_breaks = seq(0, 2020, 5)) +
+  #scale_x_continuous(name="Speed of cars", limits=c(2010, 2020)) +
+  theme(legend.position="top") + coord_fixed(ratio=250)+  theme(text = element_text(size = 15))+scale_y_continuous(labels = function(x) paste0(x*1, "%"))
+
+pdf('/Users/simonwey/Repos/Report_Unemploy/Graphics/ELQ_1524.pdf')
+print(p)
+dev.off()
+
+```
+\begin{figure}
+\centering
+\includegraphics[trim={0 4cm 0 3.5cm },clip]{/Users/simonwey/Repos/Report_Unemploy/Graphics/ELQ_1524.pdf}
+\caption{Erwerbslosenquoten von Personen im Alter zwischen 15 und 24 Jahren}
+\label{EL_1524}
+\end{figure}
+
+Der Schweizer Arbeitsmarkt ist überdurchschnittlich dynamisch, auch im Vergleich mit anderen europäischen Arbeitsmärkten. Dabei zeigt ein Blick auf die Zahlen, dass in den letzten Jahren auch ältere Arbeitnehmende von dieser Dynamik stark profitieren konnten: Sie bringen sich zunehmend stärker im Arbeitsmarkt ein. Gleichzeitig verhindern weiterhin betriebliche und staatliche Rahmenbedingungen wie auch eine mangelnde Flexibilität und Offenheit gegenüber neuen Arbeitsmodellen eine noch stärkere Arbeitsmarktbeteiligung dieser Altersgruppe. Noch scheint der Leidensdruck vielerorts nicht genügend gross zu sein. Zahlen zum zukünftigen Arbeitsangebot zeigen jedoch klar, dass sich die Schweiz den Luxus von brachliegendem Arbeitskräftepotenzial bei älteren Personen zukünftig schlicht nicht mehr leisten kann. Die Arbeitgeber werden zukünftig bei der Generation Silber mit der neu gegründeten Organisation focus50plus nach Gold schürfen. Um das Thema ganzheitlich anzugehen und nachhaltige Rahmenbedingungen zu schaffen ist auch die Politik gefragt, denn ohne sie entfalten viele gute Lösungen nicht ihre volle Wirkung.
+
+
+```{r ,plot5, echo=FALSE, include=FALSE, message=FALSE,warning=FALSE}
+rm(list=ls())
+
+
+library(OECD)
+library(tidyverse)
+library(ggplot2)
+
+df <- get_dataset("LFS_SEXAGE_I_R",
+                  filter = list(c("CHE"),"MW",c("1524","2534","3544","4554","5564","1564"),"EPR"))
+sel <- df %>%
+  filter(FREQ == "A",
+         obsTime >= 2000 
+         #        MEASURE == "STE"
+  ) %>%
+  select(obsTime, AGE, obsValue)
+sel$AGE[sel$AGE=="1524"] <- "15 - 24 J."
+sel$AGE[sel$AGE=="2534"] <- "25 - 34 J."
+sel$AGE[sel$AGE=="3544"] <- "35 - 44 J."
+sel$AGE[sel$AGE=="4554"] <- "45 - 54 J."
+sel$AGE[sel$AGE=="5564"] <- "55 - 64 J."
+sel$AGE[sel$AGE=="1564"] <- "15 - 64 J."
+
+p <- ggplot(data=sel, aes(x=as.Date(obsTime,"%Y"), y=obsValue, group=AGE,linetype=AGE)) +
+  geom_line(aes(color=AGE),size=0.9) +
+  scale_linetype_manual(values =c("solid","twodash","solid","solid","solid","solid"))+
+  scale_color_manual(values = c("#8E44AD", "#17202A","#34495E","#138D75","#E74C3C","#F8C471"))+
+  labs(#title = "Erwerbslosenrate",
+    #subtitle = "Verkaufte Weihnachtsbäume in USA | Quelle: Statista",
+    y = "",
+    x = "") +
+  theme_minimal()+
+  theme(legend.position="top",legend.title=element_blank()) + 
+  coord_fixed(ratio=150) +  
+  theme(text = element_text(size = 15))+
+  scale_y_continuous(labels = function(x) paste0(x*1, "%")) 
+
+
+pdf('/Users/simonwey/Repos/Report_Unemploy/Graphics/ETQ.pdf')
+print(p)
+dev.off()
+
+```
+
+
+\begin{figure} \centering
+\includegraphics[trim={0 4cm 0 2.5cm },clip]{/Users/simonwey/Repos/Report_Unemploy/Graphics/ETQ.pdf}
+\caption{Erwerbstätigenquoten von Personen unterschiedlichen Alters in der Schweiz}
+\label{ET_AGE_classes}
+\end{figure}
